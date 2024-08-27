@@ -2,6 +2,7 @@ use std::time::SystemTime;
 
 use uuid::Uuid;
 
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct MenuItemId(Uuid);
 
 impl Default for MenuItemId {
@@ -10,14 +11,15 @@ impl Default for MenuItemId {
     }
 }
 
+#[derive(Clone, Copy)]
 pub struct MenuItem {
     pub uid: MenuItemId,
-    pub name: String,
+    pub name: &'static str,
     pub cook_time_minutes: u8,
 }
 
 impl MenuItem {
-    pub fn new(name: String) -> Self {
+    pub fn new(name: &'static str) -> Self {
         Self {
             uid: MenuItemId::default(),
             name,
@@ -26,6 +28,7 @@ impl MenuItem {
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct OrderId(Uuid);
 
 impl Default for OrderId {
@@ -34,6 +37,7 @@ impl Default for OrderId {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Order {
     pub uid: OrderId,
     pub table_id: TableId,
@@ -50,6 +54,7 @@ impl Order {
     }
 }
 
+#[derive(Copy, Clone, Hash, PartialEq, Eq)]
 pub struct TableId(Uuid);
 
 impl Default for TableId {
@@ -58,6 +63,7 @@ impl Default for TableId {
     }
 }
 
+#[derive(Copy, Clone, Default)]
 pub struct Table {
     pub uid: TableId,
 }
