@@ -10,10 +10,10 @@ pub struct DataStore {
     tables: Vec<Table>,
 }
 
-impl Default for DataStore {
-    fn default() -> Self {
+impl DataStore {
+    pub fn new(table_count: usize) -> Self {
         let menu_items = MENU.iter().map(|name| MenuItem::new(name)).collect();
-        let tables: Vec<Table> = [0; 100].iter().map(|_| Table::default()).collect();
+        let tables: Vec<Table> = (0..table_count).map(|_| Table::default()).collect();
         Self {
             orders: Vec::default(),
             menu_items,
@@ -22,7 +22,6 @@ impl Default for DataStore {
     }
 }
 
-// Create generic CRUD methods to reduce interface scope.
 impl DataStore {
     pub fn insert_order(&mut self, order: &Order) -> Result<(), Infallible> {
         self.orders.push(*order);
