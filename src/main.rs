@@ -1,7 +1,10 @@
-use std::{sync::mpsc::{channel, Sender}, thread};
+use std::{
+    sync::mpsc::{sync_channel, Sender},
+    thread,
+};
 
 use tablet::start_tablet;
-use types::{MenuItem, Table, TableId, OrderId, Order, MenuItemId};
+use types::{MenuItem, MenuItemId, Order, OrderId, Table, TableId};
 
 mod store;
 mod tablet;
@@ -19,9 +22,11 @@ enum Request {
 // Add configuration, and UI to show request count and table activity
 fn main() {
     let mut data_store = store::DataStore::default();
-    let (tx, rx) = channel::<Request>();
+    let (tx, rx) = sync_channel::<Request>(1);
 
-    [0; 10].iter().for_each(|_|{
+    let mut request_count: u128 = 0;
+
+    [0; 10].iter().for_each(|_| {
         let requester = tx.clone();
         thread::spawn(move || {
             start_tablet(requester);
@@ -35,28 +40,31 @@ fn main() {
                 let new_order = Order::new(table_id, menu_item_id);
                 data_store.insert_order(&new_order).unwrap();
                 response.send(new_order).unwrap();
-            },
+            }
             R::DeleteOrder(response, order_id) => {
                 data_store.delete_order(&order_id);
                 response.send(()).unwrap();
-            },
+            }
             R::GetOrders(response, table_id) => {
                 let orders = data_store.get_orders_by_table(&table_id);
                 response.send(orders).unwrap();
-            },
-            R::GetOrder(response, table_id, order_id) =>{
+            }
+            R::GetOrder(response, table_id, order_id) => {
                 let order = data_store.get_order_by_uid(&table_id, &order_id);
                 response.send(order).unwrap();
-            },
+            }
             R::GetTables(response) => {
                 let tables = data_store.get_tables();
                 response.send(tables).unwrap();
-            },
+            }
             R::GetMenuItems(response) => {
                 let menu_items = data_store.get_menu_items();
                 response.send(menu_items).unwrap();
             }
         }
+        request_count += 1;
+        if request_count % 10000 == 0 {
+            println!("{}", request_count);
+        }
     }
 }
-

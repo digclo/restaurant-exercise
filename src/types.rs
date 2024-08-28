@@ -19,7 +19,7 @@ pub struct MenuItem {
 
 impl MenuItem {
     pub fn new(name: &'static str) -> Self {
-            let mut rng = rand::thread_rng();
+        let mut rng = rand::thread_rng();
         Self {
             uid: MenuItemId::default(),
             name,
@@ -67,4 +67,3 @@ impl Default for TableId {
 pub struct Table {
     pub uid: TableId,
 }
-
