@@ -1,15 +1,24 @@
 use std::convert::Infallible;
 
-use crate::types::{Order, OrderId, TableId, MenuItem, MenuItemId, Table};
+use crate::types::{Order, OrderId, TableId, MenuItem, Table};
 
+const MENU: [&str; 5] = ["Ramen", "Soba", "Udon", "Tendon", "Katsudon"];
 
-#[derive(Default)]
 pub struct DataStore {
     orders: Vec<Order>,
     menu_items: Vec<MenuItem>,
     tables: Vec<Table>,
 }
 
+impl Default for DataStore {
+    fn default() -> Self {  
+        let menu_items = MENU.iter().map(|name| MenuItem::new(name)).collect();
+        let tables: Vec<Table> = [0; 100].iter().map(|_|Table::default()).collect();
+        Self { orders: Vec::default(), menu_items, tables }
+    }
+}
+
+// Create generic CRUD methods to reduce interface scope.
 impl DataStore {
     pub fn insert_order(&mut self, order: &Order) -> Result<(), Infallible>  {
         self.orders.push(*order);
@@ -30,30 +39,18 @@ impl DataStore {
             .cloned().collect()
     }
 
-    pub fn get_order_by_uid(&mut self, target_id: &OrderId) -> Option<Order> {
+    pub fn get_order_by_uid(&mut self, table_id:&TableId, order_id: &OrderId) -> Option<Order> {
         self.orders.iter()
-            .find(|&order|order.uid == *target_id)
+            .filter(|&order|order.table_id == *table_id)
+            .find(|&order|order.uid == *order_id)
             .cloned()
     }
 
-    pub fn insert_menu_item(&mut self, item: &MenuItem) -> Result<(), Infallible>  {
-        self.menu_items.push(*item);
-        Ok(())
+    pub fn get_menu_items(&mut self) -> Vec<MenuItem> {
+        self.menu_items.to_vec()
     }
 
-
-    pub fn get_menu_item_by_uid(&mut self, target_id: &MenuItemId) -> Option<MenuItem> {
-        self.menu_items.iter()
-            .find(|&item|item.uid == *target_id)
-            .cloned()
-    }
-    
-    pub fn insert_table(&mut self, table: &Table) -> Result<(), Infallible>  {
-        self.tables.push(*table);
-        Ok(())
-    }
-
-    pub fn get_tables(&mut self) -> Vec<Table> {
+    pub fn get_tables(&self) -> Vec<Table> {
         self.tables.to_vec()
     }
 

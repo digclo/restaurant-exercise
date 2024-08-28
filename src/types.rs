@@ -1,8 +1,7 @@
-use std::time::SystemTime;
-
+use rand::Rng;
 use uuid::Uuid;
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct MenuItemId(Uuid);
 
 impl Default for MenuItemId {
@@ -20,15 +19,16 @@ pub struct MenuItem {
 
 impl MenuItem {
     pub fn new(name: &'static str) -> Self {
+            let mut rng = rand::thread_rng();
         Self {
             uid: MenuItemId::default(),
             name,
-            cook_time_minutes: get_rand_cooktime(),
+            cook_time_minutes: rng.gen_range(5..15),
         }
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct OrderId(Uuid);
 
 impl Default for OrderId {
@@ -45,7 +45,7 @@ pub struct Order {
 }
 
 impl Order {
-    fn new(table_id: TableId, menu_item_id: MenuItemId) -> Self {
+    pub fn new(table_id: TableId, menu_item_id: MenuItemId) -> Self {
         Self {
             uid: OrderId::default(),
             table_id,
@@ -54,7 +54,7 @@ impl Order {
     }
 }
 
-#[derive(Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct TableId(Uuid);
 
 impl Default for TableId {
@@ -68,9 +68,3 @@ pub struct Table {
     pub uid: TableId,
 }
 
-fn get_rand_cooktime() -> u8 {
-    let now = SystemTime::now();
-    let since_the_epoch = now.duration_since(SystemTime::UNIX_EPOCH).unwrap();
-    let in_ms = since_the_epoch.as_millis();
-    (in_ms % 11) as u8 + 5
-}
